@@ -1,4 +1,5 @@
 import SwiftUI
+import PDFKit
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -356,6 +357,19 @@ struct LinkInfoView: View {
     }
 
     private func aiInputText() async -> String {
+        // PDFs: extract text directly from the document
+        if current.isPDF, let pdfURL = current.resolvedPDFURL,
+           let doc = PDFDocument(url: pdfURL) {
+            var allText = ""
+            for i in 0..<doc.pageCount {
+                allText += doc.page(at: i)?.string ?? ""
+                if allText.count > 8000 { break }
+            }
+            let trimmed = String(allText.prefix(8000)).trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return "\(current.title)\n\n\(trimmed)" }
+            return current.title
+        }
+        // Web links: fetch article body from the URL
         if let body = await MetadataFetcher.fetchArticleText(for: link.url), body.count > 80 {
             return "\(link.title)\n\n\(body)"
         }

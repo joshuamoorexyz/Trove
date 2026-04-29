@@ -7,7 +7,7 @@ import PDFKit
 class PDFReaderState: ObservableObject {
     weak var pdfView: PDFView?
 
-    /// Highlights the current PDF selection, stores the text, and returns it.
+    /// Highlights the current PDF selection and returns the selected text.
     func highlightSelectionAndReturn() -> String? {
         guard let pdfView,
               let selection = pdfView.currentSelection,
@@ -47,6 +47,7 @@ struct PDFReaderView: NSViewRepresentable {
         if let doc = PDFDocument(url: url) {
             pdfView.document = doc
             context.coordinator.document = doc
+            context.coordinator.appliedHighlightIDs = savedHighlights.map(\.id)
             applyHighlights(savedHighlights, to: doc)
 
             // Report word count once
@@ -65,11 +66,22 @@ struct PDFReaderView: NSViewRepresentable {
         nsView.appearance = isDark ? NSAppearance(named: .darkAqua) : NSAppearance(named: .aqua)
         context.coordinator.onHighlight = onHighlight
         state.pdfView = nsView
+
+        // Sync annotations whenever the highlight list changes
+        let newIDs = savedHighlights.map(\.id)
+        if newIDs != context.coordinator.appliedHighlightIDs,
+           let doc = nsView.document {
+            context.coordinator.appliedHighlightIDs = newIDs
+            removeAllHighlightAnnotations(from: doc)
+            applyHighlights(savedHighlights, to: doc)
+        }
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
-    // Re-apply highlights by searching for the stored text in the document
+    // MARK: - Annotation helpers
+
+    /// Add yellow highlight annotations for each stored highlight text.
     private func applyHighlights(_ highlights: [Highlight], to doc: PDFDocument) {
         for hl in highlights {
             guard !hl.text.isEmpty else { continue }
@@ -84,8 +96,19 @@ struct PDFReaderView: NSViewRepresentable {
         }
     }
 
+    /// Strip every highlight-type annotation from every page.
+    private func removeAllHighlightAnnotations(from doc: PDFDocument) {
+        for i in 0..<doc.pageCount {
+            guard let page = doc.page(at: i) else { continue }
+            let toRemove = page.annotations.filter { $0.type == "Highlight" }
+            toRemove.forEach { page.removeAnnotation($0) }
+        }
+    }
+
     class Coordinator: NSObject {
         var document: PDFDocument?
         var onHighlight: ((String) -> Void)?
+        /// Tracks the IDs of highlights currently rendered in the PDF view.
+        var appliedHighlightIDs: [UUID] = []
     }
 }

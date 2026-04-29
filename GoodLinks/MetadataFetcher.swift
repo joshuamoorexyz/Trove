@@ -169,24 +169,22 @@ enum AppleIntelligence {
         if #available(macOS 26.0, *), isAvailable {
             do {
                 let session = LanguageModelSession(
-                    instructions: "You suggest short topical tags for articles."
+                    instructions: "You identify the single most relevant topical tag for an article."
                 )
                 let prompt = """
-                Suggest 3 to 5 short single-word topical tags for this article.
-                Respond with ONLY the tags as a comma-separated list, all lowercase, no other text.
-                Example: javascript, performance, optimization
+                What is the single most relevant one-word tag for this article?
+                Respond with ONLY that one tag, lowercase, no punctuation, no explanation.
+                Example: swift
 
                 \(String(text.prefix(4000)))
                 """
                 let response = try await session.respond(to: prompt)
-                let raw = response.content.lowercased()
-                let parts: [String] = raw.split(separator: ",").map {
-                    $0.trimmingCharacters(in: .whitespacesAndNewlines)
-                }
-                let cleaned: [String] = parts.filter { tag in
-                    !tag.isEmpty && tag.count <= 25 && !tag.contains(" ") && !tag.contains("\n")
-                }
-                return Array(cleaned.prefix(5))
+                let tag = response.content
+                    .lowercased()
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .components(separatedBy: .whitespacesAndNewlines).first ?? ""
+                guard !tag.isEmpty, tag.count <= 25, !tag.contains("\n") else { return [] }
+                return [tag]
             } catch {
                 return []
             }
