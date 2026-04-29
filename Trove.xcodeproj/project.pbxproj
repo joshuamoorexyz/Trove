@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CC00000000000000000020 /* GoodLinksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000010 /* GoodLinksApp.swift */; };
+		CC00000000000000000020 /* TroveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000010 /* TroveApp.swift */; };
 		CC00000000000000000021 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000011 /* ContentView.swift */; };
 		CC00000000000000000022 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000012 /* SidebarView.swift */; };
 		CC00000000000000000023 /* LinkListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000013 /* LinkListView.swift */; };
@@ -29,7 +29,7 @@
 
 /* Begin PBXFileReference section */
 		CC00000000000000000001 /* Trove.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trove.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CC00000000000000000010 /* GoodLinksApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoodLinksApp.swift; sourceTree = "<group>"; };
+		CC00000000000000000010 /* TroveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TroveApp.swift; sourceTree = "<group>"; };
 		CC00000000000000000011 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CC00000000000000000012 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		CC00000000000000000013 /* LinkListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkListView.swift; sourceTree = "<group>"; };
@@ -60,10 +60,10 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		CC00000000000000000002 /* GoodLinks */ = {
+		CC00000000000000000002 /* Trove */ = {
 			isa = PBXGroup;
 			children = (
-				CC00000000000000000010 /* GoodLinksApp.swift */,
+				CC00000000000000000010 /* TroveApp.swift */,
 				CC00000000000000000011 /* ContentView.swift */,
 				CC00000000000000000012 /* SidebarView.swift */,
 				CC00000000000000000013 /* LinkListView.swift */,
@@ -82,7 +82,7 @@
 				CC0000000000000000001C /* Assets.xcassets */,
 				CC00000000000000000005 /* Preview Content */,
 			);
-			path = GoodLinks;
+			path = Trove;
 			sourceTree = "<group>";
 		};
 		CC00000000000000000003 /* Products */ = {
@@ -96,7 +96,7 @@
 		CC00000000000000000004 = {
 			isa = PBXGroup;
 			children = (
-				CC00000000000000000002 /* GoodLinks */,
+				CC00000000000000000002 /* Trove */,
 				CC00000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -144,7 +144,7 @@
 					};
 				};
 			};
-			buildConfigurationList = CC00000000000000000007 /* Build configuration list for PBXProject "GoodLinks" */;
+			buildConfigurationList = CC00000000000000000007 /* Build configuration list for PBXProject "Trove" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -179,7 +179,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CC00000000000000000020 /* GoodLinksApp.swift in Sources */,
+				CC00000000000000000020 /* TroveApp.swift in Sources */,
 				CC00000000000000000021 /* ContentView.swift in Sources */,
 				CC00000000000000000022 /* SidebarView.swift in Sources */,
 				CC00000000000000000023 /* LinkListView.swift in Sources */,
@@ -306,7 +306,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"GoodLinks/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Trove/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -334,7 +334,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"GoodLinks/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Trove/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -356,7 +356,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CC00000000000000000007 /* Build configuration list for PBXProject "GoodLinks" */ = {
+		CC00000000000000000007 /* Build configuration list for PBXProject "Trove" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC00000000000000000009 /* Debug */,
