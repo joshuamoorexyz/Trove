@@ -9,31 +9,22 @@ struct AddLinkView: View {
     @State private var selectedFolderID: UUID? = nil
     @State private var selectedPDF: URL? = nil
     @State private var isImportingPDF = false
-    @State private var mode: AddMode = .url
     @FocusState private var focused: Bool
-
-    enum AddMode { case url, pdf }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Header + mode picker
-            HStack {
-                Image(systemName: mode == .pdf ? "doc.fill" : "link.badge.plus")
+
+            // Header
+            HStack(spacing: 8) {
+                Image(systemName: selectedPDF != nil ? "doc.fill" : "link.badge.plus")
                     .font(.title2)
-                    .foregroundStyle(mode == .pdf ? .orange : .blue)
-                Text(mode == .pdf ? "Import PDF" : "Add Link")
+                    .foregroundStyle(selectedPDF != nil ? .orange : .blue)
+                Text(selectedPDF != nil ? "Import PDF" : "Add Link")
                     .font(.headline)
-                Spacer()
-                Picker("", selection: $mode) {
-                    Label("URL", systemImage: "link").tag(AddMode.url)
-                    Label("PDF", systemImage: "doc.fill").tag(AddMode.pdf)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 140)
-                .onChange(of: mode) { urlText = ""; selectedPDF = nil }
             }
 
-            if mode == .url {
+            // URL field
+            if selectedPDF == nil {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("URL").font(.caption).foregroundStyle(.secondary)
                     TextField("https://example.com", text: $urlText)
@@ -41,45 +32,62 @@ struct AddLinkView: View {
                         .focused($focused)
                         .onSubmit { add() }
                 }
-            } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("PDF File").font(.caption).foregroundStyle(.secondary)
-                    if let pdf = selectedPDF {
-                        HStack(spacing: 8) {
-                            Image(systemName: "doc.fill")
-                                .font(.title3)
-                                .foregroundStyle(.orange)
-                            VStack(alignment: .leading) {
-                                Text(pdf.deletingPathExtension().lastPathComponent)
-                                    .font(.system(size: 13, weight: .medium))
-                                    .lineLimit(1)
-                                Text(pdf.lastPathComponent)
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Button { selectedPDF = nil } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(10)
-                        .background(Color.orange.opacity(0.08))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    } else {
-                        Button {
-                            choosePDF()
-                        } label: {
-                            Label("Choose PDF File…", systemImage: "doc.badge.plus")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                    }
+
+                // Divider with "or"
+                HStack {
+                    Rectangle().fill(Color.secondary.opacity(0.25)).frame(height: 1)
+                    Text("or").font(.caption).foregroundStyle(.secondary).fixedSize()
+                    Rectangle().fill(Color.secondary.opacity(0.25)).frame(height: 1)
                 }
+
+                // PDF import button
+                Button {
+                    choosePDF()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.badge.plus")
+                        Text("Import a PDF File…")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity)
             }
 
+            // PDF selected state
+            if let pdf = selectedPDF {
+                HStack(spacing: 10) {
+                    Image(systemName: "doc.fill")
+                        .font(.largeTitle)
+                        .foregroundStyle(.orange)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(pdf.deletingPathExtension().lastPathComponent)
+                            .font(.system(size: 13, weight: .semibold))
+                            .lineLimit(2)
+                        Text(pdf.lastPathComponent)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    Spacer()
+                    Button {
+                        selectedPDF = nil
+                        focused = true
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Remove selected PDF")
+                }
+                .padding(12)
+                .background(Color.orange.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+
+            // Folder picker
             if !store.folders.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Folder").font(.caption).foregroundStyle(.secondary)
@@ -111,6 +119,7 @@ struct AddLinkView: View {
                 }
             }
 
+            // Progress
             if store.isFetching || isImportingPDF {
                 HStack(spacing: 8) {
                     ProgressView().scaleEffect(0.7)
@@ -119,11 +128,12 @@ struct AddLinkView: View {
                 }
             }
 
+            // Actions
             HStack {
                 Button("Cancel") { dismiss() }
                     .keyboardShortcut(.escape, modifiers: [])
                 Spacer()
-                Button(mode == .pdf ? "Import PDF" : "Add Link") { add() }
+                Button(selectedPDF != nil ? "Import PDF" : "Add Link") { add() }
                     .keyboardShortcut(.return, modifiers: [])
                     .buttonStyle(.borderedProminent)
                     .disabled(addDisabled)
@@ -133,7 +143,8 @@ struct AddLinkView: View {
         .frame(width: 420)
         .onAppear { focused = true }
         .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification)) { _ in
-            if mode == .url, let clip = NSPasteboard.general.string(forType: .string),
+            if selectedPDF == nil,
+               let clip = NSPasteboard.general.string(forType: .string),
                clip.hasPrefix("http"), urlText.isEmpty {
                 urlText = clip
             }
@@ -142,7 +153,7 @@ struct AddLinkView: View {
 
     private var addDisabled: Bool {
         if isImportingPDF || store.isFetching { return true }
-        if mode == .pdf { return selectedPDF == nil }
+        if let _ = selectedPDF { return false }
         return urlText.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
@@ -151,12 +162,13 @@ struct AddLinkView: View {
         panel.allowedContentTypes = [UTType.pdf]
         panel.allowsMultipleSelection = false
         panel.title = "Choose a PDF"
+        panel.prompt = "Import"
         if panel.runModal() == .OK { selectedPDF = panel.url }
     }
 
     private func add() {
         let folderID = selectedFolderID
-        if mode == .pdf, let pdfURL = selectedPDF {
+        if let pdfURL = selectedPDF {
             isImportingPDF = true
             Task {
                 await store.importPDF(from: pdfURL, folderID: folderID)
