@@ -58,6 +58,7 @@ struct PDFReaderView: NSViewRepresentable {
         }
 
         context.coordinator.onHighlight = onHighlight
+        context.coordinator.currentURL = url
         state.pdfView = pdfView
         return pdfView
     }
@@ -67,7 +68,24 @@ struct PDFReaderView: NSViewRepresentable {
         context.coordinator.onHighlight = onHighlight
         state.pdfView = nsView
 
-        // Sync annotations whenever the highlight list changes
+        // Different PDF selected — swap the document entirely
+        if url != context.coordinator.currentURL {
+            context.coordinator.currentURL = url
+            if let doc = PDFDocument(url: url) {
+                nsView.document = doc
+                context.coordinator.document = doc
+                context.coordinator.appliedHighlightIDs = savedHighlights.map(\.id)
+                applyHighlights(savedHighlights, to: doc)
+
+                var allText = ""
+                for i in 0..<doc.pageCount { allText += doc.page(at: i)?.string ?? "" }
+                let wc = allText.split(whereSeparator: \.isWhitespace).filter { !$0.isEmpty }.count
+                DispatchQueue.main.async { self.onWordCount?(wc) }
+            }
+            return
+        }
+
+        // Same PDF — sync annotations if highlights changed
         let newIDs = savedHighlights.map(\.id)
         if newIDs != context.coordinator.appliedHighlightIDs,
            let doc = nsView.document {
@@ -108,6 +126,7 @@ struct PDFReaderView: NSViewRepresentable {
     class Coordinator: NSObject {
         var document: PDFDocument?
         var onHighlight: ((String) -> Void)?
+        var currentURL: URL?
         /// Tracks the IDs of highlights currently rendered in the PDF view.
         var appliedHighlightIDs: [UUID] = []
     }
